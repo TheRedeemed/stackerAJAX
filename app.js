@@ -1,11 +1,27 @@
 $(document).ready( function() {
 	$('.unanswered-getter').submit( function(event){
+		$('#answerers').val("");
+		$('#answerers').empty();
+		
 		// zero out results if previous search has run
 		$('.results').html('');
 		// get the value of the tags the user submitted
 		var tags = $(this).find("input[name='tags']").val();
 		getUnanswered(tags);
 	});
+
+	$('.inspiration-getter').submit( function(event){
+		$('#tags').val("");
+		$('#tags').empty();
+
+		// zero out results if previous search has run
+		$('.results').html('');
+		// get the value of the tags the user submitted
+		var answerers = $('#answerers').val();
+		//alert(answerers);
+		getTopAnswered(answerers);
+	});
+
 });
 
 // this function takes the question object returned by StackOverflow 
@@ -44,8 +60,8 @@ var showQuestion = function(question) {
 
 // this function takes the results object from StackOverflow
 // and creates info about search results to be appended to DOM
-var showSearchResults = function(query, resultNum) {
-	var results = resultNum + ' results for <strong>' + query;
+var showSearchResults = function(query, resultNum, header) {
+	var results = header + resultNum + ' results for <strong>' + query;
 	return results;
 };
 
@@ -62,9 +78,9 @@ var getUnanswered = function(tags) {
 	
 	// the parameters we need to pass in our request to StackOverflow's API
 	var request = {tagged: tags,
-								site: 'stackoverflow',
-								order: 'desc',
-								sort: 'creation'};
+				    site: 'stackoverflow',
+					order: 'desc',
+					sort: 'creation'};
 	
 	var result = $.ajax({
 		url: "http://api.stackexchange.com/2.2/questions/unanswered",
@@ -73,7 +89,7 @@ var getUnanswered = function(tags) {
 		type: "GET",
 		})
 	.done(function(result){
-		var searchResults = showSearchResults(request.tagged, result.items.length);
+		var searchResults = showSearchResults(request.tagged, result.items.length, '<div class="resultHeader">Unanswered Questions</div>');
 
 		$('.search-results').html(searchResults);
 
@@ -88,5 +104,33 @@ var getUnanswered = function(tags) {
 	});
 };
 
+var getTopAnswered = function(answerers) {
+	
+	// the parameters we need to pass in our request to StackOverflow's API
+	var request = {tagged: answerers,
+				    site: 'stackoverflow',
+					order: 'desc',
+					sort: 'creation'};
+	
+	var result = $.ajax({
+		url: "http://api.stackexchange.com/2.2/questions/unanswered",//"http://api.stackexchange.com/2.2/tags/"+answerers+"/top-answerers/all_time", 
+		data: request,
+		dataType: "jsonp",
+		type: "GET",
+		})
+	.done(function(result){
+		var searchResults = showSearchResults(request.tagged, result.items.length, '<div class="resultHeader">Top Answerers for a Tag</div>');
 
+		$('.search-results').html(searchResults);
+
+		$.each(result.items, function(i, item) {
+			var question = showQuestion(item);
+			$('.results').append(question);
+		});
+	})
+	.fail(function(jqXHR, error, errorThrown){
+		var errorElem = showError(error);
+		$('.search-results').append(errorElem);
+	});
+};
 
