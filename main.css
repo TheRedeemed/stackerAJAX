@@ -44,3 +44,19 @@
 	background-color: #F78181;
 	padding: 1em;
 }
+
+.resultHeader{
+	text-decoration: underline;
+	text-align: center;
+	font-size: 24px;
+	font-weight: bold;
+	margin: 15px;
+}
+
+dt{
+	font-weight: bold;
+}
+
+span{
+	color: red;
+}
