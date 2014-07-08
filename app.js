@@ -116,7 +116,7 @@ var getUnanswered = function(tags) {
 		})
 	.done(function(result){
 		var searchResults = showSearchResults(request.tagged, result.items.length, 
-			                                	'<div class="resultHeader">Unanswered Questions <span>\"' + tags +'\"</span></div>');
+			                                	'<div class="resultHeader">Unanswered Questions for <span>\"' + tags +'\"</span></div>');
 
 		$('.search-results').html(searchResults);
 
