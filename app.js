@@ -1,4 +1,7 @@
 $(document).ready( function() {
+
+	var tag_type;
+
 	$('.unanswered-getter').submit( function(event){
 		$('#answerers').val("");
 		$('#answerers').empty();
@@ -17,9 +20,8 @@ $(document).ready( function() {
 		// zero out results if previous search has run
 		$('.results').html('');
 		// get the value of the tags the user submitted
-		var answerers = $('#answerers').val();
-		//alert(answerers);
-		getTopAnswered(answerers);
+		var answerersTag = $('#answerers').val();
+		getAnswerers(answerersTag);
 	});
 
 });
@@ -28,33 +30,61 @@ $(document).ready( function() {
 // and creates new result to be appended to DOM
 var showQuestion = function(question) {
 	
+	
+	
+
+	
+	if(tag_type == 'unanswered'){
+
 	// clone our result template code
 	var result = $('.templates .question').clone();
-	
+
 	// Set the question properties in result
 	var questionElem = result.find('.question-text a');
 	questionElem.attr('href', question.link);
 	questionElem.text(question.title);
 
+	// set the #views for question property in result
+	var viewed = result.find('.viewed');
+	viewed.text(question.view_count);
+	
+		// set some properties related to asker
+	var asker = result.find('.asker');
+	
 	// set the date asked property in result
 	var asked = result.find('.asked-date');
 	var date = new Date(1000*question.creation_date);
 	asked.text(date.toString());
-
-	// set the #views for question property in result
-	var viewed = result.find('.viewed');
-	viewed.text(question.view_count);
-
-	// set some properties related to asker
-	var asker = result.find('.asker');
-	asker.html('<p>Name: <a target="_blank" href=http://stackoverflow.com/users/' + question.owner.user_id + ' >' +
+	
+		asker.html('<p>Name: <a target="_blank" href=http://stackoverflow.com/users/' + question.owner.user_id + ' >' +
 													question.owner.display_name +
 												'</a>' +
 							'</p>' +
  							'<p>Reputation: ' + question.owner.reputation + '</p>'
-	);
+		);
 
-	return result;
+		return result;
+	}
+	
+	if(tag_type == 'answerers'){
+
+	// clone our result template code
+	var ansR = $('.templates .answrs').clone();
+	
+		// set some properties related to asker
+	var answerer = ansR.find('.answerer');
+		
+		answerer.html('<p>Name: <a target="_blank" href=http://stackoverflow.com/users/' + question.user.user_id + ' >' +
+													question.user.display_name +
+												'</a>' +
+							'</p>' +
+ 							'<p>Reputation: ' + question.user.reputation + '</p>'
+		);
+
+		return ansR;
+	}
+	
+	
 };
 
 
@@ -94,6 +124,7 @@ var getUnanswered = function(tags) {
 		$('.search-results').html(searchResults);
 
 		$.each(result.items, function(i, item) {
+			tag_type = 'unanswered'; 
 			var question = showQuestion(item);
 			$('.results').append(question);
 		});
@@ -104,26 +135,25 @@ var getUnanswered = function(tags) {
 	});
 };
 
-var getTopAnswered = function(answerers) {
+var getAnswerers = function(tag) {
 	
 	// the parameters we need to pass in our request to StackOverflow's API
-	var request = {tagged: answerers,
-				    site: 'stackoverflow',
-					order: 'desc',
-					sort: 'creation'};
+	var request = {	site: 'stackoverflow',
+					};
 	
 	var result = $.ajax({
-		url: "http://api.stackexchange.com/2.2/questions/unanswered",//"http://api.stackexchange.com/2.2/tags/"+answerers+"/top-answerers/all_time", 
+		url: "http://api.stackexchange.com/2.2/tags/" + tag + "/top-answerers/all_time", //"http://api.stackexchange.com/2.2/questions/unanswered",
 		data: request,
 		dataType: "jsonp",
 		type: "GET",
 		})
 	.done(function(result){
-		var searchResults = showSearchResults(request.tagged, result.items.length, '<div class="resultHeader">Top Answerers for a Tag</div>');
+		var searchResults = showSearchResults(tag, result.items.length, '<div class="resultHeader">Top Answerers for a Tag</div>');
 
 		$('.search-results').html(searchResults);
 
 		$.each(result.items, function(i, item) {
+			tag_type = 'answerers'; 
 			var question = showQuestion(item);
 			$('.results').append(question);
 		});
