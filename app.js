@@ -3,25 +3,23 @@ $(document).ready( function() {
 	var tag_type;
 
 	$('.unanswered-getter').submit( function(event){
-		$('#answerers').val("");
-		$('#answerers').empty();
 		
 		// zero out results if previous search has run
 		$('.results').html('');
 		// get the value of the tags the user submitted
 		var tags = $(this).find("input[name='tags']").val();
 		getUnanswered(tags);
+		clearInputBox('#tags');
 	});
 
 	$('.inspiration-getter').submit( function(event){
-		$('#tags').val("");
-		$('#tags').empty();
 
 		// zero out results if previous search has run
 		$('.results').html('');
 		// get the value of the tags the user submitted
 		var answerersTag = $('#answerers').val();
 		getAnswerers(answerersTag);
+		clearInputBox('#answerers');
 	});
 
 });
@@ -29,10 +27,6 @@ $(document).ready( function() {
 // this function takes the question object returned by StackOverflow 
 // and creates new result to be appended to DOM
 var showQuestion = function(question) {
-	
-	
-	
-
 	
 	if(tag_type == 'unanswered'){
 
@@ -91,7 +85,9 @@ var showQuestion = function(question) {
 // this function takes the results object from StackOverflow
 // and creates info about search results to be appended to DOM
 var showSearchResults = function(query, resultNum, header) {
-	var results = header + resultNum + ' results for <strong>' + query;
+
+	var results = header + '<span>' + resultNum + ' results </span> <br/><br/>';
+	
 	return results;
 };
 
@@ -119,7 +115,8 @@ var getUnanswered = function(tags) {
 		type: "GET",
 		})
 	.done(function(result){
-		var searchResults = showSearchResults(request.tagged, result.items.length, '<div class="resultHeader">Unanswered Questions</div>');
+		var searchResults = showSearchResults(request.tagged, result.items.length, 
+			                                	'<div class="resultHeader">Unanswered Questions <span>\"' + tags +'\"</span></div>');
 
 		$('.search-results').html(searchResults);
 
@@ -148,7 +145,7 @@ var getAnswerers = function(tag) {
 		type: "GET",
 		})
 	.done(function(result){
-		var searchResults = showSearchResults(tag, result.items.length, '<div class="resultHeader">Top Answerers for a Tag</div>');
+		var searchResults = showSearchResults(tag, result.items.length, '<div class="resultHeader">Top Answerers for <span>\"' + tag +'\"</span></div>');
 
 		$('.search-results').html(searchResults);
 
@@ -164,3 +161,7 @@ var getAnswerers = function(tag) {
 	});
 };
 
+function clearInputBox(box){
+	$(box).val("");
+	$(box).empty();
+}
